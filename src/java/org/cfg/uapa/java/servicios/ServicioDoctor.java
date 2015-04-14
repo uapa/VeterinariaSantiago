@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import org.cfg.uapa.java.entidades.Doctor;
 
 public class ServicioDoctor {
+
     private static final ServicioDoctor INSTANCIA = new ServicioDoctor();
 
     public static ServicioDoctor getInstancia() {
@@ -25,100 +26,103 @@ public class ServicioDoctor {
 
     private ServicioDoctor() {
     }
-    
+
     public boolean crearDoctor(Doctor doctor) {
 
-        boolean estado = false;
-        PreparedStatement stmt = null ;
+        boolean estado;
+        //PreparedStatement stmt = null ;
         String sql = "insert into doctor(nombre,apellido) values(?,?)";
-        
-         Connection con = Coneccion.getInstancia().getConeccion();
 
-        try {
+        Connection con = Coneccion.getInstancia().getConeccion();
 
-            stmt = con.prepareStatement(sql);
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            //stmt = con.prepareStatement(sql);
             stmt.setString(1, doctor.getNombre());
             stmt.setString(2, doctor.getApellido());
 
             stmt.executeUpdate();
-            
+
             estado = true;
 
         } catch (SQLException e) {
             estado = false;
-             Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
-        }finally{
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                }
-        }
-        
+            Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
+        }/*finally{
+         if (stmt != null) {
+         try {
+         stmt.close();
+         } catch (SQLException ex) {
+         Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         }
+         }*/
+
         return estado;
 
     }
-    public List<Doctor> getListadoDoctores() {
 
-        List<Doctor> lista1 = new ArrayList<Doctor>();
+    public List<Doctor> getListadoDoctores() throws SQLException {
+
+        List<Doctor> lista1 = new ArrayList<>();
 
         String sql = "select * from doctor";
 
         Connection con = Coneccion.getInstancia().getConeccion();
-        Statement stmt = null;
-        ResultSet rs = null;
+        //Statement stmt = null;
+        //ResultSet rs = null;
 
-        try {
+        try (Statement stmt = con.createStatement()) {
 
-            stmt = con.createStatement();
-            rs = stmt.executeQuery(sql);
+            //stmt = con.createStatement();
+            //rs = stmt.executeQuery(sql);
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    Doctor doctor2 = new Doctor();
+                    doctor2.setId(rs.getInt("id"));
+                    doctor2.setNombre(rs.getString("nombre"));
+                    doctor2.setApellido(rs.getString("apellido"));
 
-            while (rs.next()) {
-                Doctor doctor2 = new Doctor();
-                doctor2.setId(rs.getInt("id"));
-                doctor2.setNombre(rs.getString("nombre"));
-                doctor2.setApellido(rs.getString("apellido"));
-
-                lista1.add(doctor2);
-            }
-
-        } catch (SQLException e) {
-            Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
+                    lista1.add(doctor2);
                 }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
+
             } catch (SQLException e) {
                 Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
-            }
-        }
+            } /*finally {
+             try {
+             if (rs != null) {
+             rs.close();
+             }
+             if (stmt != null) {
+             stmt.close();
+             }
+             if (con != null) {
+             con.close();
+             }
+             } catch (SQLException e) {
+             Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
+             }
+             }*/
 
-        return lista1;
+            return lista1;
+        }
     }
-    public Doctor getDoctorPorId(int id) {
+
+    public Doctor getDoctorPorId(int id) throws SQLException {
 
         String sql = "select * from doctor where id=?";
 
         Connection con = Coneccion.getInstancia().getConeccion();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        //PreparedStatement stmt = null;
+        //ResultSet rs = null;
         Doctor doctor1 = null;
 
-        try {
+        try(PreparedStatement stmt =con.prepareStatement(sql)) {
 
-            stmt = con.prepareStatement(sql);
+            //stmt = con.prepareStatement(sql);
             stmt.setInt(1, id);
-
-            rs = stmt.executeQuery();
+        try (ResultSet rs =stmt.executeQuery()){
+            //rs = stmt.executeQuery();
 
             rs.next();
             doctor1 = new Doctor();
@@ -127,7 +131,7 @@ public class ServicioDoctor {
 
         } catch (SQLException e) {
             Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
+        } /*finally {
             try {
                 if (rs != null) {
                     rs.close();
@@ -141,10 +145,10 @@ public class ServicioDoctor {
             } catch (SQLException e) {
                 Logger.getLogger(ServicioDoctor.class.getName()).log(Level.SEVERE, null, e);
             }
-        }
+        }*/
 
         return doctor1;
     }
-    
-    
+    }
+
 }

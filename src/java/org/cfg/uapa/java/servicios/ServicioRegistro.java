@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package org.cfg.uapa.java.servicios;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -12,25 +13,27 @@ import java.util.logging.Logger;
 import org.cfg.uapa.java.entidades.Cliente;
 
 public class ServicioRegistro {
+
     private static final ServicioRegistro INSTANCIA = new ServicioRegistro();
-    
+
     public static ServicioRegistro getInstancia() {
         return INSTANCIA;
     }
+
     private ServicioRegistro() {
     }
-    
+
     public boolean crearCliente(Cliente cliente) {
 
-        boolean estado = false;
-        PreparedStatement stmt = null ;
+        boolean estado;
+        //PreparedStatement stmt = null ;
         String sql = "insert into cliente(nombre,apellido,telefono,calle,apartamento,ciudad,pais_id,usuario,clave) values(?,?,?,?,?,?,?,?,?)";
-        
-         Connection con = Coneccion.getInstancia().getConeccion();
 
-        try {
+        Connection con = Coneccion.getInstancia().getConeccion();
 
-            stmt = con.prepareStatement(sql);
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            //stmt = con.prepareStatement(sql);
             stmt.setString(1, cliente.getNombre());
             stmt.setString(2, cliente.getApellido());
             stmt.setString(3, cliente.getTelefono());
@@ -42,26 +45,24 @@ public class ServicioRegistro {
             stmt.setString(9, cliente.getClave());
 
             stmt.executeUpdate();
-            
+
             estado = true;
 
         } catch (SQLException e) {
             estado = false;
-             Logger.getLogger(ServicioRegistro.class.getName()).log(Level.SEVERE, null, e);
-        }finally{
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(ServicioRegistro.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                }
-        }
-        
+            Logger.getLogger(ServicioRegistro.class.getName()).log(Level.SEVERE, null, e);
+        }/*finally{
+         if (stmt != null) {
+         try {
+         stmt.close();
+         } catch (SQLException ex) {
+         Logger.getLogger(ServicioRegistro.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         }
+         }*/
+
         return estado;
 
     }
-    
-    
-    
+
 }

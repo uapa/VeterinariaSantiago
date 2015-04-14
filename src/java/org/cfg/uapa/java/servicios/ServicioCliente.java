@@ -19,9 +19,8 @@ import java.util.logging.Logger;
 import org.cfg.uapa.java.entidades.Usuario;
 import org.cfg.uapa.java.entidades.Cliente;
 
-
-
 public class ServicioCliente {
+
     private static final ServicioCliente INSTANCIA = new ServicioCliente();
 
     public static ServicioCliente getInstancia() {
@@ -33,25 +32,24 @@ public class ServicioCliente {
 
     public List<Cliente> getListadoCliente() {
 
-        List<Cliente> clientes = new ArrayList<Cliente>();
+        List<Cliente> clientes = new ArrayList<>();
 
         try {
-            
+
             Statement stmt = Coneccion.getInstancia().getConeccion().createStatement();
-                
+
             ResultSet rs = stmt.executeQuery("select * from cliente");
 
-                while (rs.next()) {
+            while (rs.next()) {
 
-                    Cliente cliente = new Cliente();
-                    cliente.setId(rs.getInt("id"));
-                    cliente.setNombre(rs.getString("nombre"));
-                    cliente.setApellido(rs.getString("apellido"));
-                    cliente.setUsuario(rs.getString("usuario"));
-                    cliente.setClave(rs.getString("clave"));
-                    clientes.add(cliente);
-                }
-            
+                Cliente cliente = new Cliente();
+                cliente.setId(rs.getInt("id"));
+                cliente.setNombre(rs.getString("nombre"));
+                cliente.setApellido(rs.getString("apellido"));
+                cliente.setUsuario(rs.getString("usuario"));
+                cliente.setClave(rs.getString("clave"));
+                clientes.add(cliente);
+            }
 
         } catch (SQLException e) {
             System.out.println("Error en el SQl");
@@ -93,46 +91,48 @@ public class ServicioCliente {
 
         return usuario1;
     }
-    public Cliente getClientePorId(int id) {
+
+    public Cliente getClientePorId(int id) throws SQLException {
 
         String sql = "select * from cliente where id=?";
 
         Connection con = Coneccion.getInstancia().getConeccion();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        //PreparedStatement stmt = null;
+        //ResultSet rs = null;
         Cliente cliente = null;
 
-        try {
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
 
-            stmt = con.prepareStatement(sql);
+            //stmt = con.prepareStatement(sql);
             stmt.setInt(1, id);
 
-            rs = stmt.executeQuery();
+            //rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                cliente = new Cliente();
+                cliente.setId(rs.getInt("id"));
+                cliente.setNombre(rs.getString("nombre"));
 
-            rs.next();
-            cliente = new Cliente();
-            cliente.setId(rs.getInt("id"));
-            cliente.setNombre(rs.getString("nombre"));
-
-        } catch (SQLException e) {
-            Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
             } catch (SQLException e) {
                 Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-            }
-        }
+            } /*finally {
+             try {
+             if (rs != null) {
+             rs.close();
+             }
+             if (stmt != null) {
+             stmt.close();
+             }
+             if (con != null) {
+             con.close();
+             }
+             } catch (SQLException e) {
+             Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
+             }
+             }*/
 
-        return cliente;
+            return cliente;
+        }
     }
 
 }

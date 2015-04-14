@@ -15,186 +15,188 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import org.cfg.uapa.java.entidades.Especie;
-
 
 /**
  *
  * @author NAM
  */
 public class ServicioEspecie {
-    
-private static final ServicioEspecie INSTANCIA = new ServicioEspecie();
+
+    private static final ServicioEspecie INSTANCIA = new ServicioEspecie();
 
     public static ServicioEspecie getInstancia() {
         return INSTANCIA;
     }
 
     private ServicioEspecie() {
-    }    
-    
+    }
+
     public boolean crearEspecie(Especie especie) {
 
-        boolean estado = false;
-        PreparedStatement stmt = null ;
+        boolean estado;
+        //PreparedStatement stmt = null ;
         String sql = "insert into especie(nombre) values(?)";
-        
-         Connection con = Coneccion.getInstancia().getConeccion();
 
-        try {
+        Connection con = Coneccion.getInstancia().getConeccion();
 
-            stmt = con.prepareStatement(sql);
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            //stmt = con.prepareStatement(sql);
             stmt.setString(1, especie.getNombre());
-            
 
             stmt.executeUpdate();
-            
+
             estado = true;
 
         } catch (SQLException e) {
             estado = false;
-             Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-        }finally{
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                }
-        }
-        
+            Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
+        }/*finally{
+         if (stmt != null) {
+         try {
+         stmt.close();
+         } catch (SQLException ex) {
+         Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         }
+         }*/
+
         return estado;
 
     }
-    public List<Especie> getListadoEspecies() {
 
-        List<Especie> lista = new ArrayList<Especie>();
+    public List<Especie> getListadoEspecies() throws SQLException {
+
+        List<Especie> lista = new ArrayList<>();
 
         String sql = "select * from especie";
 
         Connection con = Coneccion.getInstancia().getConeccion();
-        Statement stmt = null;
-        ResultSet rs = null;
+        //Statement stmt = null;
+        //ResultSet rs = null;
 
-        try {
+        try (Statement stmt = con.createStatement()) {
 
-            stmt = con.createStatement();
-            rs = stmt.executeQuery(sql);
+            //stmt = con.createStatement();
+            //rs = stmt.executeQuery(sql);
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    Especie especie = new Especie();
+                    especie.setId(rs.getInt("id"));
+                    especie.setNombre(rs.getString("nombre"));
 
-            while (rs.next()) {
-                Especie especie = new Especie();
-                especie.setId(rs.getInt("id"));
-                especie.setNombre(rs.getString("nombre"));
-
-                lista.add(especie);
-            }
-
-        } catch (SQLException e) {
-            Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
+                    lista.add(especie);
                 }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
+
             } catch (SQLException e) {
                 Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-            }
-        }
+            } /*finally {
+             try {
+             if (rs != null) {
+             rs.close();
+             }
+             if (stmt != null) {
+             stmt.close();
+             }
+             if (con != null) {
+             con.close();
+             }
+             } catch (SQLException e) {
+             Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
+             }
+             }*/
 
-        return lista;
+            return lista;
+        }
     }
-    
-    public Especie getEspeciePorId(int id) {
+
+    public Especie getEspeciePorId(int id) throws SQLException {
 
         String sql = "select * from especie where id=?";
 
         Connection con = Coneccion.getInstancia().getConeccion();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        //PreparedStatement stmt = null;
+        //ResultSet rs = null;
         Especie especie = null;
 
-        try {
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
 
-            stmt = con.prepareStatement(sql);
+            //stmt = con.prepareStatement(sql);
             stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                //rs = stmt.executeQuery();
 
-            rs = stmt.executeQuery();
+                rs.next();
+                especie = new Especie();
+                especie.setId(rs.getInt("id"));
+                especie.setNombre(rs.getString("nombre"));
 
-            rs.next();
-            especie = new Especie();
-            especie.setId(rs.getInt("id"));
-            especie.setNombre(rs.getString("nombre"));
-
-        } catch (SQLException e) {
-            Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
             } catch (SQLException e) {
                 Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-            }
+            } /*finally {
+             try {
+             if (rs != null) {
+             rs.close();
+             }
+             if (stmt != null) {
+             stmt.close();
+             }
+             if (con != null) {
+             con.close();
+             }
+             } catch (SQLException e) {
+             Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
+             }
+             }*/
+
+            return especie;
         }
-
-        return especie;
     }
-    public List<Especie> getListadoEspecie() {
 
-        List<Especie> lista = new ArrayList<Especie>();
+    public List<Especie> getListadoEspecie() throws SQLException {
+
+        List<Especie> lista = new ArrayList<>();
 
         String sql = "select * from especie";
 
         Connection con = Coneccion.getInstancia().getConeccion();
-        Statement stmt = null;
-        ResultSet rs = null;
+        //Statement stmt = null;
+        //ResultSet rs = null;
 
-        try {
+        try (Statement stmt = con.createStatement()) {
 
-            stmt = con.createStatement();
-            rs = stmt.executeQuery(sql);
+            //stmt = con.createStatement();
+            //rs = stmt.executeQuery(sql);
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    Especie especie = new Especie();
+                    especie.setId(rs.getInt("id"));
+                    especie.setNombre(rs.getString("nombre"));
 
-            while (rs.next()) {
-                Especie especie = new Especie();
-                especie.setId(rs.getInt("id"));
-                especie.setNombre(rs.getString("nombre"));
-
-                lista.add(especie);
-            }
-
-        } catch (SQLException e) {
-            Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
+                    lista.add(especie);
                 }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
+
             } catch (SQLException e) {
                 Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
-            }
-        }
+            } /*finally {
+             try {
+             if (rs != null) {
+             rs.close();
+             }
+             if (stmt != null) {
+             stmt.close();
+             }
+             if (con != null) {
+             con.close();
+             }
+             } catch (SQLException e) {
+             Logger.getLogger(ServicioEspecie.class.getName()).log(Level.SEVERE, null, e);
+             }
+             }*/
 
-        return lista;
+            return lista;
+        }
     }
-    
+
 }
